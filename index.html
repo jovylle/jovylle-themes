@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="windows-xp">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jovylle Themes</title>
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+  <link rel="stylesheet" href="themes.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { min-height: 100vh; }
+    #app { max-width: 960px; margin: 0 auto; padding: 16px; }
+    .loading { text-align: center; padding: 40px; font-size: 14px; }
+    .error { color: #c00; text-align: center; padding: 20px; }
+    .section { margin-bottom: 24px; }
+    .section-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .project-card { padding: 12px; }
+    .project-card h3 { font-size: 15px; margin-bottom: 4px; }
+    .project-card p { font-size: 12px; opacity: 0.8; }
+    .tech-tag { display: inline-block; font-size: 10px; padding: 1px 6px; margin: 2px; border: 1px solid; }
+    .highlight-card { padding: 12px; }
+    .resume-summary { padding: 12px; font-size: 13px; line-height: 1.6; }
+    .profile-card { padding: 16px; text-align: center; }
+    .profile-card h2 { font-size: 22px; }
+    .profile-card p { font-size: 13px; opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header id="toolbar">
+      <h1>Jovylle · Theme Playground</h1>
+      <div id="theme-switcher"></div>
+    </header>
+    <div id="content" class="loading">Loading CMS data…</div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
