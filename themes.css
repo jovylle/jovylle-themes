@@ -325,3 +325,115 @@
 [data-theme='parallax'] ::-webkit-scrollbar { width: 6px; }
 [data-theme='parallax'] ::-webkit-scrollbar-track { background: var(--plx-bg); }
 [data-theme='parallax'] ::-webkit-scrollbar-thumb { background: var(--plx-accent); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════
+   SYNTHWAVE — 80s retro-futuristic neon
+   ═══════════════════════════════════════════ */
+[data-theme='synthwave'] {
+  --sw-bg: #0d0221;
+  --sw-pink: #ff2d78;
+  --sw-cyan: #00f5ff;
+  --sw-purple: #b86fff;
+  --sw-text: #e8e0ff;
+  --sw-muted: #7d6fa8;
+  --sw-border: rgba(255, 45, 120, 0.25);
+  --sw-glow-pink: 0 0 10px rgba(255,45,120,0.45), 0 0 40px rgba(255,45,120,0.12);
+  --sw-glow-cyan: 0 0 10px rgba(0,245,255,0.45), 0 0 40px rgba(0,245,255,0.12);
+
+  --bg: var(--sw-bg);
+  --surface: rgba(255, 20, 147, 0.04);
+  --text: var(--sw-text);
+  --text-muted: var(--sw-muted);
+  --accent: var(--sw-pink);
+  --border: var(--sw-border);
+  --radius: 3px;
+  --font: 'Courier New', Courier, monospace;
+  --font-size: 13px;
+}
+
+[data-theme='synthwave'] body,
+[data-theme='synthwave'] #app { background: var(--bg); color: var(--text); font-family: var(--font); font-size: var(--font-size); }
+[data-theme='synthwave'] ::selection { background: var(--sw-pink); color: #0d0221; }
+
+/* toolbar */
+[data-theme='synthwave'] #toolbar {
+  background: rgba(13, 2, 33, 0.9);
+  border: none;
+  border-bottom: 1px solid var(--sw-pink);
+  box-shadow: var(--sw-glow-pink);
+  padding: 10px 16px; margin-bottom: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-radius: 0;
+}
+[data-theme='synthwave'] #toolbar h1 {
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: var(--sw-cyan);
+  text-shadow: 0 0 8px var(--sw-cyan), 0 0 24px rgba(0,245,255,0.5);
+}
+
+/* section headings */
+[data-theme='synthwave'] .section-title {
+  font-size: 10px !important; font-weight: 700;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: var(--sw-cyan);
+  text-shadow: 0 0 8px var(--sw-cyan);
+  border-left: 2px solid var(--sw-pink);
+  padding-left: 8px;
+  margin-bottom: 12px;
+}
+
+/* cards */
+[data-theme='synthwave'] .project-card,
+[data-theme='synthwave'] .highlight-card,
+[data-theme='synthwave'] .resume-summary,
+[data-theme='synthwave'] .profile-card {
+  background: rgba(13, 2, 33, 0.85) !important;
+  border: 1px solid var(--sw-border) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: inset 0 0 24px rgba(255,45,120,0.03);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+[data-theme='synthwave'] .project-card:hover,
+[data-theme='synthwave'] .highlight-card:hover {
+  border-color: rgba(255,45,120,0.6) !important;
+  box-shadow: var(--sw-glow-pink) !important;
+}
+
+/* links + tags */
+[data-theme='synthwave'] a { color: var(--sw-cyan) !important; text-decoration: none; }
+[data-theme='synthwave'] a:hover { text-shadow: var(--sw-glow-cyan); }
+[data-theme='synthwave'] .tech-tag {
+  background: rgba(0,245,255,0.05) !important;
+  border: 1px solid rgba(0,245,255,0.2) !important;
+  border-radius: 2px !important;
+  color: var(--sw-cyan) !important;
+  font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* switcher */
+[data-theme='synthwave'] .ts-trigger {
+  color: var(--sw-text) !important;
+  border: 1px solid var(--sw-border) !important;
+  border-radius: 2px !important;
+  background: transparent !important;
+  font-size: 12px !important;
+}
+[data-theme='synthwave'] .ts-trigger:hover {
+  border-color: var(--sw-pink) !important;
+  box-shadow: var(--sw-glow-pink) !important;
+}
+[data-theme='synthwave'] .ts-dropdown {
+  background: #0d0221 !important;
+  border: 1px solid var(--sw-pink) !important;
+  border-radius: 2px !important;
+  box-shadow: var(--sw-glow-pink) !important;
+}
+[data-theme='synthwave'] .ts-opt { color: var(--sw-text) !important; }
+[data-theme='synthwave'] .ts-opt:hover { background: rgba(255,45,120,0.12) !important; color: var(--sw-pink) !important; }
+[data-theme='synthwave'] .ts-active { color: var(--sw-pink) !important; font-weight: 700; }
+
+/* scrollbar */
+[data-theme='synthwave'] ::-webkit-scrollbar { width: 6px; }
+[data-theme='synthwave'] ::-webkit-scrollbar-track { background: #0d0221; }
+[data-theme='synthwave'] ::-webkit-scrollbar-thumb { background: var(--sw-pink); box-shadow: var(--sw-glow-pink); border-radius: 3px; }

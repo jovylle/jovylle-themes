@@ -5,6 +5,7 @@ const THEMES = [
   { id: 'windows-xp', label: 'Windows XP', icon: 'bx-windows' },
   { id: 'newspaper', label: 'Newspaper', icon: 'bx-news' },
   { id: 'parallax', label: 'Parallax', icon: 'bx-layer' },
+  { id: 'synthwave', label: 'Synthwave', icon: 'bx-music' },
 ]
 
 const STORAGE_KEY = 'jovylle-theme'
