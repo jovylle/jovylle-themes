@@ -1,0 +1,39 @@
+/* Shared base layout for document-style themes (default, newspaper, parallax).
+   Visual skin is provided by each theme's own CSS via CSS variables. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { min-height: 100vh; }
+#app { max-width: 960px; margin: 0 auto; padding: 16px; }
+
+#toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: inherit; font-size: 13px; text-decoration: none;
+  padding: 6px 12px; border-radius: 8px;
+  border: 1px solid transparent;
+}
+.back-link:hover { background: rgba(128,128,128,0.12); }
+
+.loading { text-align: center; padding: 40px; font-size: 14px; }
+.error { color: #c00; text-align: center; padding: 20px; }
+
+.section { margin-bottom: 24px; }
+.section-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+
+.project-card { padding: 12px; }
+.project-card h3 { font-size: 15px; margin-bottom: 4px; }
+.project-card p { font-size: 12px; opacity: 0.85; line-height: 1.5; }
+
+.tech-tag { display: inline-block; font-size: 10px; padding: 1px 6px; margin: 2px; border: 1px solid; }
+
+.highlight-card { padding: 12px; }
+.resume-summary { padding: 12px; font-size: 13px; line-height: 1.6; }
+
+.profile-card { padding: 16px; text-align: center; }
+.profile-card h2 { font-size: 22px; }
+.profile-card p { font-size: 13px; opacity: 0.85; }

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="parallax">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jovylle · Parallax</title>
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+  <link rel="stylesheet" href="../../shared/base.css">
+  <link rel="stylesheet" href="parallax.css">
+</head>
+<body>
+  <div class="plx-stars"></div>
+  <div id="app">
+    <header id="toolbar">
+      <h1>Jovylle</h1>
+      <a class="back-link" href="../../index.html"><i class='bx bx-grid-alt'></i> Themes</a>
+    </header>
+    <div id="content" class="loading">Loading CMS data…</div>
+  </div>
+  <script type="module">
+    import { fetchAllCmsData } from '../../shared/cms.js'
+    import { renderPortfolio } from '../../shared/render.js'
+    const content = document.getElementById('content')
+    fetchAllCmsData()
+      .then(d => renderPortfolio(d, content))
+      .catch(e => { content.innerHTML = `<div class="error">Failed to load CMS data: ${e.message}</div>` })
+
+    // subtle parallax on scroll + pointer
+    const stars = document.querySelector('.plx-stars')
+    window.addEventListener('scroll', () => {
+      stars.style.transform = `translateY(${window.scrollY * 0.3}px)`
+    }, { passive: true })
+    window.addEventListener('pointermove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 20
+      const y = (e.clientY / window.innerHeight - 0.5) * 20
+      stars.style.setProperty('--px', x + 'px')
+      stars.style.setProperty('--py', y + 'px')
+    }, { passive: true })
+  </script>
+</body>
+</html>

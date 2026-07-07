@@ -1,0 +1,77 @@
+/* Parallax — dark glass with a drifting starfield. */
+:root {
+  --plx-bg: #0a0a0f;
+  --plx-text: #e8e8e8;
+  --plx-accent: #6366f1;
+  --plx-muted: #888;
+  --bg: var(--plx-bg);
+  --surface: rgba(255,255,255,0.03);
+  --text: var(--plx-text);
+  --text-muted: var(--plx-muted);
+  --accent: var(--plx-accent);
+  --border: rgba(255,255,255,0.08);
+  --radius: 12px;
+  --font: 'Inter', system-ui, sans-serif;
+}
+body, #app { background: var(--bg); color: var(--text); font-family: var(--font); }
+::selection { background: var(--plx-accent); color: #fff; }
+
+/* drifting starfield behind everything */
+.plx-stars {
+  position: fixed; inset: -40px;
+  z-index: 0;
+  pointer-events: none;
+  --px: 0px; --py: 0px;
+  background:
+    radial-gradient(1.5px 1.5px at 20% 30%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 70% 20%, #cfe, transparent),
+    radial-gradient(2px 2px at 40% 70%, #fff, transparent),
+    radial-gradient(1px 1px at 85% 60%, #aef, transparent),
+    radial-gradient(1.5px 1.5px at 55% 45%, #fff, transparent),
+    radial-gradient(1px 1px at 15% 85%, #fff, transparent),
+    radial-gradient(2px 2px at 90% 85%, #cef, transparent);
+  background-repeat: repeat;
+  transform: translate(var(--px), var(--py));
+  transition: transform 0.2s ease-out;
+  opacity: 0.7;
+}
+#app { position: relative; z-index: 1; }
+
+#toolbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+}
+#app { padding-top: 60px; }
+#toolbar h1 {
+  font-weight: 600; font-size: 14px; letter-spacing: 1px; text-transform: uppercase;
+}
+.back-link {
+  border: 1px solid var(--border); border-radius: 24px;
+  color: var(--plx-text); font-size: 13px; padding: 6px 16px;
+}
+.back-link:hover { border-color: var(--plx-accent); background: transparent; }
+
+.section-title {
+  font-weight: 700; letter-spacing: -0.02em; font-size: 20px; margin-bottom: 16px;
+}
+.project-card,
+.highlight-card,
+.resume-summary,
+.profile-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  border-radius: var(--radius);
+}
+a { color: var(--plx-accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.tech-tag {
+  background: rgba(99,102,241,0.1);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 20px; color: var(--plx-accent);
+  padding: 2px 10px;
+}

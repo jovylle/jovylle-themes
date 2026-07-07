@@ -1,39 +1,155 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="windows-xp">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jovylle Themes</title>
+  <title>Jovylle · Theme Playground</title>
   <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
-  <link rel="stylesheet" href="themes.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { min-height: 100vh; }
-    #app { max-width: 960px; margin: 0 auto; padding: 16px; }
-    .loading { text-align: center; padding: 40px; font-size: 14px; }
-    .error { color: #c00; text-align: center; padding: 20px; }
-    .section { margin-bottom: 24px; }
-    .section-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
-    .grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-    .project-card { padding: 12px; }
-    .project-card h3 { font-size: 15px; margin-bottom: 4px; }
-    .project-card p { font-size: 12px; opacity: 0.8; }
-    .tech-tag { display: inline-block; font-size: 10px; padding: 1px 6px; margin: 2px; border: 1px solid; }
-    .highlight-card { padding: 12px; }
-    .resume-summary { padding: 12px; font-size: 13px; line-height: 1.6; }
-    .profile-card { padding: 16px; text-align: center; }
-    .profile-card h2 { font-size: 22px; }
-    .profile-card p { font-size: 13px; opacity: 0.8; }
+    body {
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #e8e8f0;
+      background: #0b0b12;
+      background-image:
+        radial-gradient(1200px 600px at 15% -10%, rgba(99,102,241,0.25), transparent 60%),
+        radial-gradient(1000px 500px at 100% 0%, rgba(236,72,153,0.18), transparent 55%),
+        radial-gradient(900px 600px at 50% 120%, rgba(16,185,129,0.14), transparent 60%);
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 56px 20px 64px; }
+    header { text-align: center; margin-bottom: 44px; }
+    header .eyebrow {
+      font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+      color: #8b8ba7; margin-bottom: 10px;
+    }
+    header h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; }
+    header h1 span { background: linear-gradient(90deg,#818cf8,#f472b6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    header p { color: #a5a5c0; margin-top: 12px; font-size: 15px; }
+
+    .grid {
+      display: grid; gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+    .card {
+      display: block; text-decoration: none; color: inherit;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px; overflow: hidden;
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(8px);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.25);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.5);
+    }
+    .preview { height: 150px; position: relative; overflow: hidden; }
+    .meta { padding: 14px 16px 16px; display: flex; align-items: center; gap: 12px; }
+    .meta .ic {
+      width: 40px; height: 40px; border-radius: 10px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; background: rgba(255,255,255,0.06);
+    }
+    .meta h3 { font-size: 16px; font-weight: 700; }
+    .meta p { font-size: 12px; color: #9a9ab5; margin-top: 2px; }
+    .meta .go { margin-left: auto; color: #9a9ab5; font-size: 20px; }
+    .card:hover .go { color: #fff; }
+
+    /* ── Mini previews ── */
+    .pv-default { background: #f5f5f7; }
+    .pv-default::before { content:''; position:absolute; inset:16px; border-radius:10px; background:#fff; border:1px solid #e5e5ea; box-shadow:0 4px 16px rgba(0,0,0,.08); }
+    .pv-default::after { content:''; position:absolute; left:28px; top:30px; width:64px; height:8px; border-radius:4px; background:#4f46e5; box-shadow:0 20px 0 #dfe0ff,0 40px 0 #dfe0ff; }
+
+    .pv-xp {
+      background:
+        radial-gradient(ellipse 150% 80% at 50% 125%, #9bcb3a, #5a9e29 60%, #3f7d1c),
+        linear-gradient(180deg,#2a6fd6,#8fc0ef 70%,#cfe7fb);
+    }
+    .pv-xp::before { content:''; position:absolute; left:26px; top:24px; width:120px; height:74px; background:#ece9d8; border:1px solid #0831d9; border-radius:6px 6px 0 0; box-shadow:3px 3px 10px rgba(0,0,0,.35); }
+    .pv-xp::after { content:''; position:absolute; left:26px; top:24px; width:120px; height:16px; background:linear-gradient(180deg,#3f8cf3,#0058e6); border-radius:5px 5px 0 0; }
+
+    .pv-news { background:#f5f0e8; }
+    .pv-news::before { content:'THE TIMES'; position:absolute; top:20px; left:0; right:0; text-align:center; font-family:Georgia,serif; font-weight:900; letter-spacing:3px; color:#1a1a1a; font-size:18px; border-bottom:3px double #2c2c2c; padding-bottom:8px; margin:0 24px; }
+    .pv-news::after { content:''; position:absolute; left:24px; right:24px; top:64px; height:6px; background:#1a1a1a; box-shadow:0 14px 0 #cbc6ba,0 26px 0 #cbc6ba,0 38px 0 #cbc6ba; }
+
+    .pv-plx { background:#0a0a0f; }
+    .pv-plx::before { content:''; position:absolute; inset:0;
+      background:
+        radial-gradient(1.5px 1.5px at 20% 30%,#fff,transparent),
+        radial-gradient(2px 2px at 60% 60%,#aef,transparent),
+        radial-gradient(1.5px 1.5px at 80% 25%,#fff,transparent),
+        radial-gradient(1px 1px at 35% 75%,#fff,transparent),
+        radial-gradient(2px 2px at 50% 40%,#cef,transparent);
+    }
+    .pv-plx::after { content:''; position:absolute; left:26px; top:44px; width:120px; height:60px; border-radius:12px; background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.3); box-shadow:0 8px 32px rgba(0,0,0,.4); }
+
+    footer { text-align:center; margin-top:44px; color:#71718f; font-size:12px; }
+    footer a { color:#9a9ab5; text-decoration:none; }
+    footer a:hover { color:#fff; }
   </style>
 </head>
 <body>
-  <div id="app">
-    <header id="toolbar">
-      <h1>Jovylle · Theme Playground</h1>
-      <div id="theme-switcher"></div>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">Jovylle · Playground</div>
+      <h1>Theme <span>Playground</span></h1>
+      <p>One set of data, many worlds. Pick a skin — each one lives on its own and goes all out.</p>
     </header>
-    <div id="content" class="loading">Loading CMS data…</div>
+
+    <div class="grid">
+      <a class="card" href="themes/xp/index.html">
+        <div class="preview pv-xp"></div>
+        <div class="meta">
+          <div class="ic"><i class="bx bxl-windows"></i></div>
+          <div>
+            <h3>Windows XP</h3>
+            <p>Full desktop · windows, taskbar, start menu</p>
+          </div>
+          <i class="bx bx-right-arrow-alt go"></i>
+        </div>
+      </a>
+
+      <a class="card" href="themes/parallax/index.html">
+        <div class="preview pv-plx"></div>
+        <div class="meta">
+          <div class="ic"><i class="bx bx-layer"></i></div>
+          <div>
+            <h3>Parallax</h3>
+            <p>Dark glass · drifting starfield</p>
+          </div>
+          <i class="bx bx-right-arrow-alt go"></i>
+        </div>
+      </a>
+
+      <a class="card" href="themes/newspaper/index.html">
+        <div class="preview pv-news"></div>
+        <div class="meta">
+          <div class="ic"><i class="bx bx-news"></i></div>
+          <div>
+            <h3>Newspaper</h3>
+            <p>Serif · ink on newsprint</p>
+          </div>
+          <i class="bx bx-right-arrow-alt go"></i>
+        </div>
+      </a>
+
+      <a class="card" href="themes/default/index.html">
+        <div class="preview pv-default"></div>
+        <div class="meta">
+          <div class="ic"><i class="bx bx-palette"></i></div>
+          <div>
+            <h3>Default</h3>
+            <p>Clean · modern · neutral</p>
+          </div>
+          <i class="bx bx-right-arrow-alt go"></i>
+        </div>
+      </a>
+    </div>
+
+    <footer>
+      Data from <a href="https://content.jovylle.com" target="_blank" rel="noopener">content.jovylle.com</a> · built by Jovylle
+    </footer>
   </div>
-  <script src="app.js"></script>
 </body>
 </html>

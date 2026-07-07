@@ -1,0 +1,307 @@
+/* ═══════════════════════════════════════════════════════════
+   Windows XP — Luna. A full desktop experience.
+   Wallpaper is original CSS art inspired by the "Bliss" mood.
+   ═══════════════════════════════════════════════════════════ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --xp-window: #ece9d8;
+  --xp-title-from: #0058e6;
+  --xp-title-mid: #3f8cf3;
+  --xp-title-to: #2a7bf6;
+  --xp-window-border: #0831d9;
+  --xp-btn-face: #ece9d8;
+  --xp-btn-shadow: #aca899;
+  --xp-btn-dark: #716f64;
+  --xp-btn-light: #ffffff;
+  --xp-text: #000;
+  --xp-selection: #316ac5;
+  --xp-font: Tahoma, 'Trebuchet MS', 'Segoe UI', sans-serif;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--xp-font);
+  font-size: 11px;
+  color: var(--xp-text);
+  user-select: none;
+}
+
+/* ── Wallpaper: Bliss-style rolling hills ── */
+#desktop {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    /* clouds */
+    radial-gradient(ellipse 220px 60px at 22% 26%, rgba(255,255,255,0.9), rgba(255,255,255,0) 60%),
+    radial-gradient(ellipse 160px 45px at 30% 22%, rgba(255,255,255,0.85), rgba(255,255,255,0) 60%),
+    radial-gradient(ellipse 260px 70px at 74% 18%, rgba(255,255,255,0.85), rgba(255,255,255,0) 60%),
+    radial-gradient(ellipse 130px 40px at 82% 24%, rgba(255,255,255,0.8), rgba(255,255,255,0) 60%),
+    /* the green hill */
+    radial-gradient(ellipse 150% 78% at 50% 118%, #9bcb3a 0%, #7cb342 38%, #5a9e29 60%, #3f7d1c 100%),
+    /* sky */
+    linear-gradient(180deg, #2a6fd6 0%, #4d90e0 34%, #8fc0ef 62%, #cfe7fb 82%, #e9f4d8 92%, #d7ecb0 100%);
+  background-repeat: no-repeat;
+}
+/* soft sun glow */
+#desktop::before {
+  content: '';
+  position: absolute;
+  top: -12%; left: 50%; transform: translateX(-50%);
+  width: 60%; height: 55%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.55), rgba(255,255,255,0) 70%);
+  pointer-events: none;
+}
+
+/* ── Desktop icons ── */
+#desktop-icons {
+  position: absolute;
+  top: 12px; left: 12px;
+  display: flex; flex-direction: column;
+  gap: 4px;
+  z-index: 1;
+}
+.desk-icon {
+  width: 78px;
+  padding: 6px 4px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  cursor: default;
+  text-align: center;
+}
+.desk-icon .di-glyph {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; color: #fff;
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.4));
+}
+.desk-icon .di-label {
+  color: #fff; font-size: 11px; line-height: 1.2;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+  padding: 0 2px;
+}
+.desk-icon:hover { background: rgba(49,106,197,0.28); border-color: rgba(255,255,255,0.35); }
+.desk-icon.selected { background: rgba(49,106,197,0.45); border-color: rgba(255,255,255,0.5); }
+.desk-icon.selected .di-label { background: var(--xp-selection); }
+
+/* ── Windows ── */
+.xp-window {
+  position: absolute;
+  min-width: 260px;
+  background: var(--xp-window);
+  border: 1px solid var(--xp-window-border);
+  border-top: none;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 3px 3px 12px rgba(0,0,0,0.45);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.xp-window.min { display: none; }
+
+.xp-titlebar {
+  height: 28px;
+  padding: 0 3px 0 6px;
+  display: flex; align-items: center; gap: 5px;
+  background: linear-gradient(180deg, var(--xp-title-from) 0%, var(--xp-title-mid) 8%, var(--xp-title-from) 42%, var(--xp-title-to) 92%, #1c5fd6 100%);
+  border-radius: 7px 7px 0 0;
+  color: #fff;
+  cursor: default;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+}
+.xp-window.blur .xp-titlebar {
+  background: linear-gradient(180deg, #7aa3e0 0%, #96b8e8 50%, #7aa3e0 100%);
+}
+.xp-titlebar .xp-tb-icon { font-size: 16px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4)); }
+.xp-titlebar .xp-tb-title {
+  flex: 1; font-weight: 700; font-size: 12px;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.xp-ctrls { display: flex; gap: 2px; }
+.xp-ctrl {
+  width: 21px; height: 21px;
+  border: 1px solid rgba(255,255,255,0.85);
+  border-radius: 3px;
+  color: #fff; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; line-height: 1;
+  background: linear-gradient(180deg, #4b95f5, #1a63d8);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.xp-ctrl:hover { filter: brightness(1.12); }
+.xp-ctrl.close { background: linear-gradient(180deg, #f18f6f, #d64a26); }
+.xp-ctrl.close:hover { background: linear-gradient(180deg, #f7a488, #e5622f); filter: brightness(1.12); }
+
+.xp-body {
+  background: #fff;
+  margin: 3px;
+  border: 1px solid #94b8e8;
+  padding: 12px;
+  overflow: auto;
+  flex: 1;
+  cursor: default;
+  user-select: text;
+}
+.xp-window .xp-body { max-height: 60vh; }
+
+/* content typography inside windows */
+.xp-body h3 { font-size: 13px; margin-bottom: 6px; color: #0a246a; }
+.xp-body p { font-size: 11px; line-height: 1.5; margin-bottom: 6px; }
+.xp-list { list-style: none; }
+.xp-list li {
+  padding: 8px; margin-bottom: 6px;
+  border: 1px solid #d9d5c3; background: #fbfaf5;
+}
+.xp-list li strong { font-size: 12px; }
+.xp-tag {
+  display: inline-block; font-size: 10px;
+  padding: 1px 6px; margin: 2px 2px 0 0;
+  background: #eef3fb; border: 1px solid #b8cbe8; color: #14448c;
+}
+.xp-body a { color: #0000ee; }
+.xp-body a:visited { color: #551a8b; }
+.xp-muted { color: #666; font-size: 10px; }
+.xp-profile-head { text-align: center; padding: 4px 0 10px; }
+.xp-profile-head .avatar {
+  width: 56px; height: 56px; margin: 0 auto 6px;
+  border-radius: 50%; background: linear-gradient(135deg, #3f8cf3, #0058e6);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 26px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* ── Taskbar ── */
+#taskbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 30px;
+  display: flex; align-items: stretch;
+  background: linear-gradient(180deg, #245edb 0%, #3f8cf3 8%, #245edb 44%, #1c50c9 90%, #1941a5 100%);
+  border-top: 1px solid #0831d9;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+  z-index: 9000;
+}
+#start-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 22px 3px 10px;
+  margin-right: 6px;
+  font-style: italic; font-weight: 700; font-size: 15px;
+  color: #fff; text-shadow: 1px 1px 1px rgba(0,0,0,0.45);
+  background: linear-gradient(180deg, #5eb14d 0%, #3c9b3c 8%, #2f8a2f 46%, #37972f 92%, #2c7a24 100%);
+  border-radius: 0 12px 12px 0;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+}
+#start-btn:hover { filter: brightness(1.08); }
+#start-btn.active { filter: brightness(0.9); box-shadow: inset 1px 1px 4px rgba(0,0,0,0.4); }
+#start-btn .flag {
+  width: 18px; height: 18px; border-radius: 3px;
+  background:
+    linear-gradient(135deg, #f34f4f 0 50%, #4fa3f3 50% 100%),
+    linear-gradient(135deg, #6ecb4f 0 50%, #f3d24f 50% 100%);
+  background-size: 100% 50%, 100% 50%;
+  background-position: top, bottom;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.6);
+  transform: skewX(-6deg);
+}
+
+#task-buttons {
+  flex: 1;
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 4px;
+  overflow: hidden;
+}
+.task-btn {
+  height: 100%;
+  min-width: 130px; max-width: 160px;
+  padding: 0 8px;
+  display: flex; align-items: center; gap: 6px;
+  color: #fff; font-size: 11px;
+  background: linear-gradient(180deg, #3f8cf3, #2565d8);
+  border: 1px solid #1c50c9;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.task-btn .tb-ic { font-size: 14px; }
+.task-btn span { overflow: hidden; text-overflow: ellipsis; }
+.task-btn:hover { filter: brightness(1.1); }
+.task-btn.active {
+  background: linear-gradient(180deg, #1c50c9, #2565d8);
+  box-shadow: inset 1px 1px 4px rgba(0,0,0,0.35);
+}
+
+#clock {
+  display: flex; align-items: center;
+  padding: 0 14px;
+  color: #fff; font-size: 11px;
+  background: linear-gradient(180deg, #159ee3 0%, #139de3 8%, #0d8bd0 90%);
+  border-left: 1px solid #0d5bbf;
+  box-shadow: inset 1px 0 0 rgba(255,255,255,0.35);
+}
+
+/* ── Start menu ── */
+#start-menu {
+  position: fixed;
+  left: 0; bottom: 30px;
+  width: 300px;
+  display: none;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #0831d9;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 3px -3px 14px rgba(0,0,0,0.4);
+  overflow: hidden;
+  z-index: 9500;
+}
+#start-menu.open { display: flex; }
+.sm-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, #1c60e0 0%, #3f8cf3 50%, #1c60e0 100%);
+  color: #fff; font-weight: 700; font-size: 14px;
+  border-bottom: 2px solid #ff9b3f;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.4);
+}
+.sm-header .sm-avatar {
+  width: 34px; height: 34px; border-radius: 4px;
+  background: linear-gradient(135deg, #ffd27f, #ff9b3f);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 20px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.sm-items { padding: 6px; background: #fff; }
+.sm-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 10px; border-radius: 2px;
+  cursor: pointer; font-size: 12px; color: #000;
+}
+.sm-item .sm-ic {
+  width: 26px; height: 26px; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  color: #0058e6;
+}
+.sm-item strong { font-weight: 700; }
+.sm-item:hover { background: var(--xp-selection); color: #fff; }
+.sm-item:hover .sm-ic { color: #fff; }
+.sm-footer {
+  display: flex; justify-content: flex-end; gap: 16px;
+  padding: 8px 14px;
+  background: linear-gradient(180deg, #3f8cf3, #1c60e0);
+  border-top: 1px solid #0831d9;
+}
+.sm-footer .sm-item { color: #fff; }
+.sm-footer .sm-item:hover { background: rgba(255,255,255,0.18); }
+
+/* scrollbars */
+.xp-body::-webkit-scrollbar { width: 16px; height: 16px; }
+.xp-body::-webkit-scrollbar-track { background: #e9e6d6; }
+.xp-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #d9e4f5, #a7c1e8);
+  border: 1px solid #7f9db9; border-radius: 2px;
+}

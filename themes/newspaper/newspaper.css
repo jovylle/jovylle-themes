@@ -1,0 +1,55 @@
+/* Newspaper — print, serif, ink on newsprint. */
+:root {
+  --np-bg: #f5f0e8;
+  --np-text: #1a1a1a;
+  --np-accent: #8b0000;
+  --np-border: #2c2c2c;
+  --bg: var(--np-bg);
+  --surface: var(--np-bg);
+  --text: var(--np-text);
+  --text-muted: #666;
+  --accent: var(--np-accent);
+  --border: var(--np-border);
+  --font: Georgia, 'Times New Roman', Times, serif;
+}
+body, #app { background: var(--bg); color: var(--text); font-family: var(--font); }
+
+#toolbar {
+  flex-direction: column;
+  text-align: center;
+  border-bottom: 3px double var(--np-border);
+  padding: 16px 0 8px;
+  margin-bottom: 16px;
+}
+#toolbar h1 {
+  font-family: var(--font); font-size: 32px; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+.back-link {
+  font-family: var(--font); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 1px;
+  border: 1px solid var(--np-border); border-radius: 0;
+  color: var(--np-text);
+}
+.back-link:hover { background: var(--np-text); color: var(--np-bg); }
+
+.section-title {
+  font-family: var(--font); text-transform: uppercase; letter-spacing: 2px;
+  font-weight: 900; border-bottom: 1px solid var(--np-border);
+  padding-bottom: 4px; margin-bottom: 12px;
+}
+.project-card,
+.highlight-card,
+.resume-summary,
+.profile-card {
+  border: none; border-radius: 0;
+  border-bottom: 1px solid var(--np-border);
+}
+a { color: var(--np-accent); text-decoration: underline; }
+.tech-tag {
+  background: transparent; border: none;
+  border-right: 1px solid var(--np-border); border-radius: 0;
+  padding: 0 6px; font-size: 10px; text-transform: uppercase;
+}
+.tech-tag:last-child { border-right: none; }
