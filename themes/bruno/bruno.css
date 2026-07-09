@@ -76,6 +76,32 @@ canvas#webgl {
 }
 .back-link:hover { background: rgba(0,0,0,0.55); color: #fff; }
 
+/* ── Day/night badge (top-left, below the back link) ── */
+#time-badge {
+  position: fixed;
+  top: 58px;
+  left: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: rgba(255,255,255,0.9);
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+  padding: 6px 13px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 1;
+  transition: background 0.6s ease, border-color 0.6s ease, color 0.6s ease;
+}
+#time-badge.day   { background: rgba(56,120,180,0.35);  border-color: rgba(160,210,255,0.4); color: #eaf4ff; }
+#time-badge.dusk  { background: rgba(150,70,30,0.4);    border-color: rgba(255,160,90,0.4);  color: #ffe6d0; }
+#time-badge.night { background: rgba(10,14,30,0.55);    border-color: rgba(120,140,200,0.35); color: #cdd6f5; }
+
 /* ── Controls hint ── */
 #controls-hint {
   position: fixed;
@@ -151,7 +177,8 @@ canvas#webgl {
 }
 #hud-buttons button:hover { background: rgba(0,0,0,0.6); color: #fff; }
 #mute-btn.muted { color: #f87171; }
-#camera-label {
+#camera-label,
+#map-label {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
