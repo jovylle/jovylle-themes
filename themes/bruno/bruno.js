@@ -4,6 +4,17 @@ import { RoundedBoxGeometry } from 'https://esm.sh/three@0.169.0/examples/jsm/ge
 import { fetchAllCmsData, esc } from '../../shared/cms.js'
 import { createSoundEngine } from './sfx.js'
 import { buildWorld } from './world.js'
+import { buildLoopMap } from './world-loop.js'
+
+// ─── Active map resolution: ?map= → localStorage → 'classic' (default) ───
+function resolveActiveMap() {
+  const q = new URLSearchParams(location.search).get('map')
+  if (q === 'classic' || q === 'loop') return q
+  const stored = localStorage.getItem('bruno-map')
+  if (stored === 'classic' || stored === 'loop') return stored
+  return 'classic'
+}
+const activeMap = resolveActiveMap()
 
 // ─── DOM refs ───
 const canvas = document.getElementById('webgl')
@@ -25,7 +36,10 @@ const speedFx = document.getElementById('speed-fx')
 const muteBtn = document.getElementById('mute-btn')
 const cameraBtn = document.getElementById('camera-btn')
 const cameraLabel = document.getElementById('camera-label')
+const mapBtn = document.getElementById('map-btn')
+const mapLabel = document.getElementById('map-label')
 const introPrompt = document.getElementById('intro-prompt')
+const timeBadge = document.getElementById('time-badge')
 
 // ─── Renderer & Scene ───
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
@@ -116,8 +130,11 @@ const borderGeo = new THREE.BoxGeometry(202, 2, 1)
 })
 
 // ─── Zones definition ───
+// ZONES is assigned from the active map by buildActiveMap() below, so every
+// downstream consumer (proximity → panel, minimap, nearRoad) follows the choice.
 const ZONE_RADIUS = 18
-const ZONES = [
+let ZONES = []
+const CLASSIC_ZONES = [
   { id: 'home',     label: 'Home',     pos: new THREE.Vector3(0, 0, 0),    color: 0x6366f1 },
   { id: 'projects', label: 'Projects', pos: new THREE.Vector3(0, 0, -50),  color: 0xf59e0b },
   { id: 'timeline', label: 'Timeline', pos: new THREE.Vector3(50, 0, 0),   color: 0x10b981 },
@@ -177,10 +194,7 @@ function addRoad(from, to) {
   scene.add(mesh)
 }
 
-const home = ZONES[0].pos
-ZONES.slice(1).forEach(z => addRoad(home, z.pos))
-
-// ─── Zone platforms ───
+// Sign / banner texture — shared by classic zone signs and the loop map arches.
 function makeSignTexture(text, color) {
   const c = document.createElement('canvas')
   c.width = 256; c.height = 64
@@ -195,38 +209,60 @@ function makeSignTexture(text, color) {
   return new THREE.CanvasTexture(c)
 }
 
-ZONES.forEach(zone => {
-  const platform = new THREE.Mesh(
-    new THREE.BoxGeometry(20, 0.6, 20),
-    new THREE.MeshLambertMaterial({ color: zone.color })
-  )
-  platform.position.set(zone.pos.x, 0.3, zone.pos.z)
-  platform.receiveShadow = true
-  platform.castShadow = true
-  scene.add(platform)
+// ─── Build the selected map ───
+// Both branches return the same `world` handle shape (tick / setTimeOfDay /
+// onTrack / collectibles / boostPads / …) so the shared loop needs no map logic.
+function buildActiveMap() {
+  if (activeMap === 'loop') {
+    const { zones, world } = buildLoopMap(scene, {
+      physicsWorld, groundMat, vehicleMat, propMat,
+      ZONE_RADIUS, BOUND,
+      makeRng, addSolid, distToSegment, makeSignTexture,
+    })
+    ZONES = zones
+    return world
+  }
 
-  const pole = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.15, 0.15, 4),
-    new THREE.MeshLambertMaterial({ color: 0xffffff })
-  )
-  pole.position.set(zone.pos.x, 2.3, zone.pos.z - 8)
-  pole.castShadow = true
-  scene.add(pole)
+  // ── classic hub-and-spoke map (default; byte-for-byte with the old inline) ──
+  ZONES = CLASSIC_ZONES
+  const home = ZONES[0].pos
+  ZONES.slice(1).forEach(z => addRoad(home, z.pos))
 
-  const sign = new THREE.Mesh(
-    new THREE.PlaneGeometry(6, 1.5),
-    new THREE.MeshBasicMaterial({ map: makeSignTexture(zone.label, zone.color), transparent: false })
-  )
-  sign.position.set(zone.pos.x, 4.5, zone.pos.z - 8)
-  scene.add(sign)
-})
+  // Zone platforms
+  ZONES.forEach(zone => {
+    const platform = new THREE.Mesh(
+      new THREE.BoxGeometry(20, 0.6, 20),
+      new THREE.MeshLambertMaterial({ color: zone.color })
+    )
+    platform.position.set(zone.pos.x, 0.3, zone.pos.z)
+    platform.receiveShadow = true
+    platform.castShadow = true
+    scene.add(platform)
 
-// ─── Build the world (environment, props, sky, water, gameplay toys) ───
-const world = buildWorld(scene, {
-  physicsWorld, groundMat, vehicleMat, propMat,
-  ZONES, ZONE_RADIUS, BOUND,
-  makeRng, blockedSpot, addSolid,
-})
+    const pole = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.15, 0.15, 4),
+      new THREE.MeshLambertMaterial({ color: 0xffffff })
+    )
+    pole.position.set(zone.pos.x, 2.3, zone.pos.z - 8)
+    pole.castShadow = true
+    scene.add(pole)
+
+    const sign = new THREE.Mesh(
+      new THREE.PlaneGeometry(6, 1.5),
+      new THREE.MeshBasicMaterial({ map: makeSignTexture(zone.label, zone.color), transparent: false })
+    )
+    sign.position.set(zone.pos.x, 4.5, zone.pos.z - 8)
+    scene.add(sign)
+  })
+
+  return buildWorld(scene, {
+    physicsWorld, groundMat, vehicleMat, propMat,
+    ZONES, ZONE_RADIUS, BOUND,
+    makeRng, blockedSpot, addSolid, distToSegment,
+  })
+}
+
+const world = buildActiveMap()
 const collectedTotal = world.collectibles.length
 let collectedCount = 0
 
@@ -355,7 +391,7 @@ const wheelOptions = {
   directionLocal: new CANNON.Vec3(0, -1, 0),
   suspensionStiffness: 30,
   suspensionRestLength: 0.4,
-  frictionSlip: 1.6,
+  frictionSlip: 3.0,
   dampingRelaxation: 2.3,
   dampingCompression: 4.4,
   maxSuspensionForce: 1e5,
@@ -400,6 +436,7 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Shift') keys.boost = true
   if (e.key === ' ')     { keys.handbrake = true; e.preventDefault() }
   if (e.key === 'r' || e.key === 'R') resetVehicle()
+  if (e.key === 'f' || e.key === 'F') resetToCenter()
   if (e.key === 'c' || e.key === 'C') cycleCamera()
   if (e.key === 'h' || e.key === 'H') { sfx.horn() }
   if (e.key === 'n' || e.key === 'N') cycleDayMode()
@@ -440,7 +477,7 @@ window.addEventListener('touchend', () => {
 })
 
 // ─── Vehicle controls ───
-const MAX_STEER = 0.5
+const MAX_STEER = 0.55
 const NORMAL_MAX_KMH = 55
 const BOOST_MAX_KMH = 100
 const REVERSE_MAX_KMH = 28
@@ -458,12 +495,16 @@ const _upWorld = new CANNON.Vec3()
 
 function updateVehicle(dt) {
   const active = controlsEnabled
-  const target = active ? (keys.left ? MAX_STEER : keys.right ? -MAX_STEER : 0) : 0
+  const speed = Math.abs(vehicle.currentVehicleSpeedKmHour || 0)
+
+  // Speed-sensitive steer clamp: full lock when slow, ~0.6× at top speed, so the
+  // extra grip stays responsive at low speed without getting twitchy fast.
+  const speedFrac = Math.min(1, speed / BOOST_MAX_KMH)
+  const steerLimit = MAX_STEER * (1 - 0.4 * speedFrac)
+  const target = active ? (keys.left ? steerLimit : keys.right ? -steerLimit : 0) : 0
   steering += (target - steering) * Math.min(1, dt * 8)
   vehicle.setSteeringValue(steering, 0)
   vehicle.setSteeringValue(steering, 1)
-
-  const speed = Math.abs(vehicle.currentVehicleSpeedKmHour || 0)
   boosting = active && keys.boost && keys.forward
   let force = 0
   if (active && keys.forward) {
@@ -491,8 +532,19 @@ function updateVehicle(dt) {
   sfx.setDrive(speed, boosting, reversing)
 }
 
+// R — flip / recover in place: keep XZ, right the car, lift it, zero motion.
 function resetVehicle() {
-  chassisBody.position.set(lastSafePos.x, lastSafePos.y + 1.5, lastSafePos.z)
+  chassisBody.position.y = Math.max(chassisBody.position.y, 0.5) + 1.5
+  chassisBody.quaternion.set(0, 0, 0, 1)
+  chassisBody.velocity.set(0, 0, 0)
+  chassisBody.angularVelocity.set(0, 0, 0)
+  steering = 0
+  sfx.resetBlip()
+}
+
+// F — reset back to world center (spawn).
+function resetToCenter() {
+  chassisBody.position.set(0, 4, 0)
   chassisBody.quaternion.set(0, 0, 0, 1)
   chassisBody.velocity.set(0, 0, 0)
   chassisBody.angularVelocity.set(0, 0, 0)
@@ -585,6 +637,18 @@ function applyDay() {
   headlightMat.emissiveIntensity = 0.4 + night * 1.4
   headSpot.intensity = night * 3
 
+  if (timeBadge) {
+    let icon, label, cls
+    if (dayAmount > 0.6)      { icon = '☀️'; label = 'Day';   cls = 'day' }
+    else if (dayAmount > 0.3) { icon = '🌇'; label = 'Dusk';  cls = 'dusk' }
+    else                      { icon = '🌙'; label = 'Night'; cls = 'night' }
+    if (timeBadge.dataset.phase !== cls) {        // only touch DOM on change
+      timeBadge.dataset.phase = cls
+      timeBadge.textContent = `${icon} ${label}`
+      timeBadge.className = cls
+    }
+  }
+
   world.setTimeOfDay(dayT, _sunDir, dayAmount)
   sfx.setTimeOfDay(dayT)
 }
@@ -607,8 +671,13 @@ function wheelsInContact() {
 }
 
 function nearRoad(x, z) {
-  if (ZONES.some(zz => Math.hypot(x - zz.pos.x, z - zz.pos.z) < 10)) return true
-  return ZONES.slice(1).some(zz => distToSegment(x, z, 0, 0, zz.pos.x, zz.pos.z) < 2.6)
+  // Classic map: home platform + spoke roads read as "road". The loop map has
+  // no spokes — its ring is covered by world.onTrack below.
+  if (activeMap === 'classic') {
+    if (ZONES.some(zz => Math.hypot(x - zz.pos.x, z - zz.pos.z) < 10)) return true
+    if (ZONES.slice(1).some(zz => distToSegment(x, z, 0, 0, zz.pos.x, zz.pos.z) < 2.6)) return true
+  }
+  return !!(world.onTrack && world.onTrack(x, z))
 }
 
 function updateGameplay(dt) {
@@ -720,6 +789,9 @@ fetchAllCmsData()
   .catch(() => { cmsData = {}; finishLoading() })
 
 function finishLoading() {
+  // Paint the loop map's in-world content boards now that CMS data has arrived
+  // (the world was built synchronously before the fetch resolved).
+  if (world.setContent) world.setContent(cmsData)
   setProgress(100)
   setTimeout(() => loadingEl.classList.add('hidden'), 400)
   setTimeout(() => controlsHint.classList.add('faded'), 6000)
@@ -730,12 +802,65 @@ function finishLoading() {
 function renderPanel(zoneId) {
   const d = cmsData || {}
   switch (zoneId) {
-    case 'home':     infoContent.innerHTML = renderHome(d.profile);         break
-    case 'projects': infoContent.innerHTML = renderProjects(d.projects);    break
-    case 'timeline': infoContent.innerHTML = renderTimeline(d.resume);      break
-    case 'skills':   infoContent.innerHTML = renderSkills(d.resume);        break
-    case 'contact':  infoContent.innerHTML = renderContact(d.social);       break
+    case 'home':       infoContent.innerHTML = renderHome(d.profile);              break
+    case 'about':      infoContent.innerHTML = renderAbout(d.profile, d.resume);   break
+    case 'projects':   infoContent.innerHTML = renderProjects(d.projects);         break
+    case 'timeline':   infoContent.innerHTML = renderTimeline(d.resume);           break
+    case 'highlights': infoContent.innerHTML = renderHighlights(d.highlights);     break
+    case 'skills':     infoContent.innerHTML = renderSkills(d.resume);             break
+    case 'uses':       infoContent.innerHTML = renderUses(d.uses);                 break
+    case 'contact':    infoContent.innerHTML = renderContact(d.social);            break
   }
+}
+
+// Loop-map sections (About extends Home with the résumé summary).
+function renderAbout(profile, resume) {
+  const p = profile || {}
+  const avail = p.availability
+  const isOpen = /open|available/i.test(avail || '')
+  const badge = avail ? `<div class="avail-badge ${isOpen ? 'open' : 'closed'}">${esc(avail)}</div>` : ''
+  const summaryLines = Array.isArray(resume?.summary) ? resume.summary : resume?.summary ? [resume.summary] : []
+  const summary = summaryLines.length
+    ? `<div class="timeline-summary">${summaryLines.map(l => `<p>${esc(l)}</p>`).join('')}</div>`
+    : ''
+  return `
+    <div class="zone-label">About</div>
+    <h2>${esc(p.title || 'Jovylle')}</h2>
+    ${badge}
+    <p>${esc(p.short_bio || '')}</p>
+    ${summary}
+  `
+}
+
+function renderHighlights(highlights) {
+  const list = (highlights?.highlights || []).slice(0, 8)
+  if (!list.length) return '<div class="zone-label">Highlights</div><h2>Highlights</h2><p>No highlights found.</p>'
+  const items = list.map(h => {
+    const tech = (h.technologies || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')
+    const meta = [h.tag, h.year].filter(Boolean).map(m => esc(m)).join(' · ')
+    return `
+      <div class="proj-item">
+        <h3>${esc(h.title || '')}</h3>
+        ${meta ? `<div class="tags"><span class="tag">${meta}</span></div>` : ''}
+        ${h.description ? `<p>${esc(h.description)}</p>` : ''}
+        ${tech ? `<div class="tags">${tech}</div>` : ''}
+      </div>
+    `
+  }).join('')
+  return `<div class="zone-label">Highlights</div><h2>Highlights</h2><div class="proj-list">${items}</div>`
+}
+
+function renderUses(uses) {
+  if (!uses) return '<div class="zone-label">Uses</div><h2>Uses</h2><p>No uses data.</p>'
+  const col = (title, list) => {
+    const rows = (list || []).map(it => `
+      <a class="social-link">
+        <i class="bx bx-${esc(it.icon || 'chip')}"></i>
+        <span>${esc(it.description || '')}</span>
+      </a>`).join('')
+    return `<div class="skill-cat"><h3>${title}</h3><div class="social-list">${rows}</div></div>`
+  }
+  return `<div class="zone-label">Uses</div><h2>Uses</h2>${col('Hardware', uses.hardware)}${col('Software', uses.software)}`
 }
 
 function renderHome(profile) {
@@ -956,6 +1081,19 @@ function drawMinimap() {
   ctx.fillText('W', 8, size / 2)
   ctx.fillText('E', size - 8, size / 2)
 
+  // Loop map: trace the ring so the radar reads as a circuit (classic has none).
+  if (world.loopPoints && world.loopPoints.length) {
+    ctx.beginPath()
+    world.loopPoints.forEach(([x, z], i) => {
+      const [mx, my] = toMap(x, z)
+      i ? ctx.lineTo(mx, my) : ctx.moveTo(mx, my)
+    })
+    ctx.closePath()
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)'
+    ctx.lineWidth = 3
+    ctx.stroke()
+  }
+
   for (const zone of ZONES) {
     const [mx, my] = toMap(zone.pos.x, zone.pos.z)
     if (zone.id === activeZone) {
@@ -1031,6 +1169,21 @@ function reflectMute(muted) {
 }
 if (muteBtn) muteBtn.addEventListener('click', toggleMute)
 if (cameraBtn) cameraBtn.addEventListener('click', cycleCamera)
+
+// ─── Map switcher (cycles classic ↔ loop; persists + reloads) ───
+// Reload rather than teardown: this is a static no-build app, and rebuilding the
+// Three.js scene + Cannon bodies mid-session is fragile — the loading screen +
+// intro cinematic mask the reload cleanly.
+function switchMap() {
+  const next = activeMap === 'loop' ? 'classic' : 'loop'
+  try { localStorage.setItem('bruno-map', next) } catch (e) { /* private mode */ }
+  const url = new URL(location.href)
+  url.searchParams.set('map', next)
+  location.href = url.toString()
+}
+if (mapBtn) mapBtn.addEventListener('click', switchMap)
+if (mapLabel) mapLabel.textContent = activeMap
+
 reflectMute(sfx.isMuted())
 updateCounterHUD()
 if (cameraLabel) cameraLabel.textContent = cameraMode

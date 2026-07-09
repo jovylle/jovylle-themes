@@ -13,7 +13,38 @@ function inPond(x, z, pad = 0) {
 }
 
 export function buildWorld(scene, ctx) {
-  const { BOUND, ZONES, makeRng, blockedSpot, addSolid } = ctx
+  const { BOUND, ZONES, makeRng, blockedSpot, addSolid, distToSegment } = ctx
+
+  // ─────────────────────────────────────────────────────────────
+  // Race track (closed loop) — defined first so scatter can avoid it.
+  // Rounded-rectangle circuit at ±76: outside the zone platforms (±50),
+  // inside the walls (±100). Half-width 4 → drivable width 8.
+  // ─────────────────────────────────────────────────────────────
+  const TRACK_HALF = 4
+  const TRACK = 76      // straights sit at ±76, chamfers cut the corners
+  const TRACK_IN = 56   // where a straight ends and its chamfer begins
+  // Centerline segments: [ax, az, bx, bz]
+  const trackSegments = [
+    // straights
+    [-TRACK_IN, -TRACK, TRACK_IN, -TRACK],   // N
+    [-TRACK_IN, TRACK, TRACK_IN, TRACK],     // S
+    [TRACK, -TRACK_IN, TRACK, TRACK_IN],     // E
+    [-TRACK, -TRACK_IN, -TRACK, TRACK_IN],   // W
+    // chamfered corners
+    [TRACK_IN, -TRACK, TRACK, -TRACK_IN],    // NE
+    [TRACK, TRACK_IN, TRACK_IN, TRACK],      // SE
+    [-TRACK_IN, TRACK, -TRACK, TRACK_IN],    // SW
+    [-TRACK, -TRACK_IN, -TRACK_IN, -TRACK],  // NW
+  ]
+
+  // True if (x,z) is within TRACK_HALF + pad of any track segment.
+  function onTrack(x, z, pad = 0) {
+    const limit = TRACK_HALF + pad
+    for (const [ax, az, bx, bz] of trackSegments) {
+      if (distToSegment(x, z, ax, az, bx, bz) < limit) return true
+    }
+    return false
+  }
 
   // Handles we animate every frame / on day-night change.
   const clouds = []
@@ -73,6 +104,58 @@ export function buildWorld(scene, ctx) {
   groundMesh.receiveShadow = true
   scene.add(groundMesh)
 
+  // ─────────────────────────────────────────────────────────────
+  // Race track meshes — dark asphalt strips along each segment, laid on
+  // the flat plane (purely visual; no physics). Built before scatter so it
+  // reads underneath everything at the same y.
+  // ─────────────────────────────────────────────────────────────
+  {
+    const asphaltMat = new THREE.MeshLambertMaterial({ color: 0x2b2b30 })
+    const dashMat = new THREE.MeshBasicMaterial({ color: 0xf2efe4 })
+    for (const [ax, az, bx, bz] of trackSegments) {
+      const dx = bx - ax, dz = bz - az
+      const len = Math.hypot(dx, dz)
+      // slightly overlap segment ends so corners join without gaps
+      const strip = new THREE.Mesh(
+        new THREE.BoxGeometry(TRACK_HALF * 2, 0.05, len + TRACK_HALF * 2),
+        asphaltMat
+      )
+      strip.position.set((ax + bx) / 2, 0.04, (az + bz) / 2)
+      strip.rotation.y = Math.atan2(dx, dz)
+      strip.receiveShadow = true
+      scene.add(strip)
+      // dashed white centerline
+      const dashes = Math.max(1, Math.floor(len / 4))
+      for (let d = 0; d < dashes; d++) {
+        const t = (d + 0.5) / dashes
+        const dash = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.02, 1.4), dashMat)
+        dash.position.set(ax + dx * t, 0.07, az + dz * t)
+        dash.rotation.y = Math.atan2(dx, dz)
+        scene.add(dash)
+      }
+    }
+
+    // Start/finish line — checkered CanvasTexture quad on the south straight.
+    const fc = document.createElement('canvas')
+    fc.width = fc.height = 64
+    const fg = fc.getContext('2d')
+    const sq = 16
+    for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) {
+      fg.fillStyle = (x + y) % 2 ? '#111' : '#fff'
+      fg.fillRect(x * sq, y * sq, sq, sq)
+    }
+    const finishTex = new THREE.CanvasTexture(fc)
+    finishTex.wrapS = finishTex.wrapT = THREE.RepeatWrapping
+    finishTex.repeat.set(TRACK_HALF * 2, 1)
+    const finish = new THREE.Mesh(
+      new THREE.PlaneGeometry(TRACK_HALF * 2, 2),
+      new THREE.MeshBasicMaterial({ map: finishTex })
+    )
+    finish.rotation.x = -Math.PI / 2
+    finish.position.set(0, 0.05, TRACK)
+    scene.add(finish)
+  }
+
   // Low decorative grass mounds near the edges (no colliders).
   const moundGeo = new THREE.SphereGeometry(1, 10, 6)
   const moundMat = new THREE.MeshLambertMaterial({ color: 0x4f8f24 })
@@ -81,7 +164,7 @@ export function buildWorld(scene, ctx) {
     const a = rMound() * Math.PI * 2
     const rad = 55 + rMound() * 40
     const x = Math.cos(a) * rad, z = Math.sin(a) * rad
-    if (inPond(x, z, 6)) continue
+    if (inPond(x, z, 6) || onTrack(x, z, 2)) continue
     const m = new THREE.Mesh(moundGeo, moundMat)
     const s = 2 + rMound() * 4
     m.position.set(x, -0.2, z)
@@ -196,7 +279,7 @@ export function buildWorld(scene, ctx) {
     const a = rTree() * Math.PI * 2
     const rad = 26 + rTree() * 70
     const x = Math.cos(a) * rad, z = Math.sin(a) * rad
-    if (blockedSpot(x, z, 15) || inPond(x, z, 5)) continue
+    if (blockedSpot(x, z, 15) || inPond(x, z, 5) || onTrack(x, z, 2)) continue
     const variant = Math.floor(rTree() * 3)
     addTree(x, z, variant)
     treeSpots.push([x, z])
@@ -210,7 +293,7 @@ export function buildWorld(scene, ctx) {
     const a = rBush() * Math.PI * 2
     const rad = 20 + rBush() * 75
     const x = Math.cos(a) * rad, z = Math.sin(a) * rad
-    if (blockedSpot(x, z, 10) || inPond(x, z, 4)) continue
+    if (blockedSpot(x, z, 10) || inPond(x, z, 4) || onTrack(x, z, 2)) continue
     const g = new THREE.Group()
     const n = 2 + Math.floor(rBush() * 3)
     for (let k = 0; k < n; k++) {
@@ -234,7 +317,7 @@ export function buildWorld(scene, ctx) {
     const a = rFlower() * Math.PI * 2
     const rad = 18 + rFlower() * 78
     const x = Math.cos(a) * rad, z = Math.sin(a) * rad
-    if (blockedSpot(x, z, 9) || inPond(x, z, 3)) continue
+    if (blockedSpot(x, z, 9) || inPond(x, z, 3) || onTrack(x, z, 2)) continue
     const g = new THREE.Group()
     const petalMat = new THREE.MeshLambertMaterial({ color: flowerColors[Math.floor(rFlower() * flowerColors.length)] })
     const n = 4 + Math.floor(rFlower() * 5)
@@ -259,7 +342,7 @@ export function buildWorld(scene, ctx) {
     const a = rLog() * Math.PI * 2
     const rad = 25 + rLog() * 65
     const x = Math.cos(a) * rad, z = Math.sin(a) * rad
-    if (blockedSpot(x, z, 10) || inPond(x, z, 4)) continue
+    if (blockedSpot(x, z, 10) || inPond(x, z, 4) || onTrack(x, z, 2)) continue
     const log = new THREE.Mesh(logGeo, trunkMat)
     log.position.set(x, 0.35, z)
     log.rotation.y = rLog() * Math.PI
@@ -274,7 +357,7 @@ export function buildWorld(scene, ctx) {
     const a = rRock() * Math.PI * 2
     const rad = 15 + rRock() * 82
     const x = Math.cos(a) * rad, z = Math.sin(a) * rad
-    if (blockedSpot(x, z, 12) || inPond(x, z, 4)) continue
+    if (blockedSpot(x, z, 12) || inPond(x, z, 4) || onTrack(x, z, 2)) continue
     const r = 0.5 + rRock() * 0.9
     const rock = new THREE.Mesh(new THREE.SphereGeometry(r, 5, 4), rockMat)
     rock.position.set(x, r * 0.6, z)
@@ -295,7 +378,7 @@ export function buildWorld(scene, ctx) {
     const a = rLamp() * Math.PI * 2
     const rad = 22 + rLamp() * 55
     const x = Math.cos(a) * rad, z = Math.sin(a) * rad
-    if (blockedSpot(x, z, 12) || inPond(x, z, 5)) continue
+    if (blockedSpot(x, z, 12) || inPond(x, z, 5) || onTrack(x, z, 2)) continue
     const pole = new THREE.Mesh(lampGeo, poleMat)
     pole.position.set(x, 2.5, z); pole.castShadow = true
     scene.add(pole)
@@ -324,7 +407,7 @@ export function buildWorld(scene, ctx) {
       const a = rHouse() * Math.PI * 2
       const rad = 34 + rHouse() * 45
       x = Math.cos(a) * rad; z = Math.sin(a) * rad
-    } while ((blockedSpot(x, z, 16) || inPond(x, z, 8)) && ++tries < 40)
+    } while ((blockedSpot(x, z, 16) || inPond(x, z, 8) || onTrack(x, z, 2)) && ++tries < 40)
     if (tries >= 40) continue
     const w = 5, h = 4, d = 5
     const g = new THREE.Group()
@@ -357,7 +440,7 @@ export function buildWorld(scene, ctx) {
     const a = rFence() * Math.PI * 2
     const rad = 30 + rFence() * 50
     const cx = Math.cos(a) * rad, cz = Math.sin(a) * rad
-    if (blockedSpot(cx, cz, 12) || inPond(cx, cz, 6)) continue
+    if (blockedSpot(cx, cz, 12) || inPond(cx, cz, 6) || onTrack(cx, cz, 2)) continue
     const dir = rFence() > 0.5 ? [1, 0] : [0, 1]
     for (let k = 0; k < 6; k++) {
       const seg = new THREE.Mesh(hedgeGeo, hedgeMat)
@@ -552,7 +635,7 @@ export function buildWorld(scene, ctx) {
     const a = rProp() * Math.PI * 2
     const rad = 12 + rProp() * 70
     const x = Math.cos(a) * rad, z = Math.sin(a) * rad
-    if (blockedSpot(x, z, 6) || inPond(x, z, 4)) continue
+    if (blockedSpot(x, z, 6) || inPond(x, z, 4) || onTrack(x, z, 2)) continue
     addDynamicProp(propKinds[placed % 3], x, z)
     placed++
   }
@@ -816,7 +899,7 @@ export function buildWorld(scene, ctx) {
   }
 
   return {
-    tick, setTimeOfDay,
+    tick, setTimeOfDay, onTrack,
     collectibles, dynamicProps, boostPads, ramps,
     campfirePos: campfires[0] ? campfires[0].pos : null,
     POND,

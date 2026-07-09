@@ -21,13 +21,13 @@ export function createSoundEngine() {
   let muted = localStorage.getItem('bruno-muted') === '1'
 
   // Persistent nodes (created in ensure()).
-  let master, engineGain, engineFilter, osc1, osc2
+  let master, engineGain, engineFilter, osc1, rumbleFilter
   let boostGain, boostFilter
   let driftGain, driftFilter, rollGain, rollFilter
   let windGain, windFilter
   let birdGain, cricketGain
   let noiseBuffer
-  let engineLoopSrc, boostLoopSrc, driftLoopSrc, rollLoopSrc, windLoopSrc
+  let noiseRumbleLoopSrc, boostLoopSrc, driftLoopSrc, rollLoopSrc, windLoopSrc
   let ambientTimer = null
   let reverseBeepTimer = null
 
@@ -60,7 +60,8 @@ export function createSoundEngine() {
     master.gain.value = muted ? 0 : 1
     master.connect(actx.destination)
 
-    // ── Engine: two detuned oscillators → lowpass → gain ──
+    // ── Engine: triangle osc + noise rumble → lowpass → gain ──
+    // (softer than the old detuned-saw pair; the noise adds grit without buzz)
     engineGain = actx.createGain()
     engineGain.gain.value = 0.0
     engineFilter = actx.createBiquadFilter()
@@ -70,14 +71,18 @@ export function createSoundEngine() {
     engineFilter.connect(engineGain)
 
     osc1 = actx.createOscillator()
-    osc1.type = 'sawtooth'
+    osc1.type = 'triangle'
     osc1.frequency.value = 45
-    osc2 = actx.createOscillator()
-    osc2.type = 'sawtooth'
-    osc2.frequency.value = 45
-    osc2.detune.value = 12
     osc1.connect(engineFilter)
-    osc2.connect(engineFilter)
+
+    // noise rumble → narrow bandpass (center tracks RPM) → engine lowpass
+    rumbleFilter = actx.createBiquadFilter()
+    rumbleFilter.type = 'bandpass'
+    rumbleFilter.frequency.value = 180
+    rumbleFilter.Q.value = 1.8
+    rumbleFilter.connect(engineFilter)
+    noiseRumbleLoopSrc = noiseSource()
+    noiseRumbleLoopSrc.connect(rumbleFilter)
 
     // ── Boost whoosh: noise → bandpass → gain ──
     boostGain = actx.createGain()
@@ -141,7 +146,7 @@ export function createSoundEngine() {
     if (unlocked) return
     unlocked = true
     // Start every always-on source exactly once.
-    osc1.start(); osc2.start()
+    osc1.start(); noiseRumbleLoopSrc.start()
     boostLoopSrc.start(); driftLoopSrc.start(); rollLoopSrc.start(); windLoopSrc.start()
     startAmbientScheduler()
   }
@@ -167,10 +172,10 @@ export function createSoundEngine() {
     const base = 45 + s * 105 + (boosting ? 20 : 0)
     const t = now()
     osc1.frequency.setTargetAtTime(base, t, 0.08)
-    osc2.frequency.setTargetAtTime(base * 1.005, t, 0.08)
+    rumbleFilter.frequency.setTargetAtTime(180 + s * 400, t, 0.08)
     engineFilter.frequency.setTargetAtTime(300 + s * 1400, t, 0.1)
-    // idle rumble present at rest, swells with speed
-    engineGain.gain.setTargetAtTime(0.06 + s * 0.16, t, 0.1)
+    // idle rumble present at rest, swells with speed (~half the old level)
+    engineGain.gain.setTargetAtTime(0.03 + s * 0.08, t, 0.1)
 
     // boost whoosh follows the turbo flag
     boostGain.gain.setTargetAtTime(boosting ? 0.10 : 0.0, t, 0.15)
