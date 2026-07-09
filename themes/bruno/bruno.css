@@ -104,6 +104,183 @@ canvas#webgl {
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.9);
 }
+.key-wide { width: auto; padding: 0 10px; }
+
+/* ── Minimap / radar HUD ── */
+/* Bottom-left so it isn't covered by the right-side info panel. */
+#minimap {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 150px;
+  height: 150px;
+  background: rgba(10,10,20,0.55);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  z-index: 10;
+  pointer-events: none;
+}
+@media (max-width: 600px) {
+  #minimap { width: 110px; height: 110px; bottom: 14px; left: 12px; }
+}
+
+/* ── HUD buttons (mute + camera), top-right ── */
+#hud-buttons {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  z-index: 12;
+}
+#hud-buttons button {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 50%;
+  color: rgba(255,255,255,0.9);
+  font-size: 20px;
+  cursor: pointer;
+  pointer-events: all;
+  backdrop-filter: blur(8px);
+  transition: background 0.15s, color 0.15s;
+}
+#hud-buttons button:hover { background: rgba(0,0,0,0.6); color: #fff; }
+#mute-btn.muted { color: #f87171; }
+#camera-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.8);
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 3px 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+}
+
+/* ── Collectible counter, top-center ── */
+#collectible-counter {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #ffd83d;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,216,61,0.35);
+  padding: 6px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(6px);
+  z-index: 11;
+}
+
+/* ── Speedometer + compass, bottom-right ── */
+#hud-dials {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+  pointer-events: none;
+}
+#compass {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.9);
+  background: rgba(10,10,20,0.55);
+  border: 1px solid rgba(255,255,255,0.18);
+  padding: 4px 12px;
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+  min-width: 78px;
+  text-align: center;
+}
+#speedometer {
+  position: relative;
+  width: 92px; height: 92px;
+  background: rgba(10,10,20,0.55);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 50%;
+  backdrop-filter: blur(6px);
+}
+#speedometer svg { transform: rotate(135deg); }
+.speedo-track { fill: none; stroke: rgba(255,255,255,0.12); stroke-width: 5; }
+#speedo-arc {
+  fill: none;
+  stroke: #4ade80;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 163.36;
+  stroke-dashoffset: 163.36;
+  transition: stroke-dashoffset 0.12s linear, stroke 0.2s;
+}
+.speedo-readout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  pointer-events: none;
+}
+.speedo-readout span { font-size: 22px; font-weight: 700; line-height: 1; }
+.speedo-readout small { font-size: 9px; color: #9aa0b5; letter-spacing: 0.05em; }
+@media (max-width: 600px) {
+  #hud-dials { bottom: 14px; right: 12px; }
+  #speedometer { width: 74px; height: 74px; }
+  #speedometer svg { width: 74px; height: 74px; }
+}
+
+/* ── Speed FX overlay (vignette + streaks) ── */
+#speed-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s linear;
+  background:
+    radial-gradient(ellipse 60% 60% at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%),
+    repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0 2px, transparent 2px 22px);
+}
+
+/* ── Intro prompt ── */
+#intro-prompt {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  background: rgba(10,10,20,0.6);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 10px 22px;
+  border-radius: 24px;
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  z-index: 13;
+  animation: introPulse 1.8s ease-in-out infinite;
+}
+#intro-prompt.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+@keyframes introPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
 /* ── Zone toast ── */
 #zone-toast {

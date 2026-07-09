@@ -22,6 +22,14 @@
 
     <a class="back-link" href="../../index.html">← Gallery</a>
 
+    <div id="hud-buttons">
+      <button id="mute-btn" aria-label="Toggle sound"><i class="bx bx-volume-full"></i></button>
+      <button id="camera-btn" aria-label="Cycle camera"><i class="bx bx-camera"></i></button>
+      <div id="camera-label">chase</div>
+    </div>
+
+    <div id="collectible-counter">★ 0 / 0</div>
+
     <div id="controls-hint">
       <div class="key-group">
         <div class="key">W</div>
@@ -31,11 +39,46 @@
           <div class="key">D</div>
         </div>
       </div>
-      <span>Drive around</span>
+      <span>Drive</span>
       <div class="key-divider"></div>
       <div class="key">R</div>
       <span>Reset</span>
+      <div class="key-divider"></div>
+      <div class="key key-wide">Shift</div>
+      <span>Boost</span>
+      <div class="key-divider"></div>
+      <div class="key key-wide">Space</div>
+      <span>Drift</span>
+      <div class="key-divider"></div>
+      <div class="key">C</div>
+      <span>Cam</span>
+      <div class="key-divider"></div>
+      <div class="key">H</div>
+      <span>Horn</span>
+      <div class="key-divider"></div>
+      <div class="key">N</div>
+      <span>Time</span>
+      <div class="key-divider"></div>
+      <div class="key">M</div>
+      <span>Mute</span>
     </div>
+
+    <canvas id="minimap" width="150" height="150"></canvas>
+
+    <div id="hud-dials">
+      <div id="compass">N 0°</div>
+      <div id="speedometer">
+        <svg width="92" height="92" viewBox="0 0 92 92">
+          <circle class="speedo-track" cx="46" cy="46" r="26"></circle>
+          <circle id="speedo-arc" cx="46" cy="46" r="26"></circle>
+        </svg>
+        <div class="speedo-readout"><span id="speedo-value">0</span><small>km/h</small></div>
+      </div>
+    </div>
+
+    <div id="speed-fx"></div>
+
+    <div id="intro-prompt">Click or press any key to drive</div>
 
     <div id="zone-toast"></div>
 
