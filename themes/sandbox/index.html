@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="sandbox">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jovylle · Sandbox</title>
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="../../shared/base.css">
+  <link rel="stylesheet" href="sandbox.css">
+</head>
+<body>
+  <div id="app">
+    <header id="toolbar">
+      <h1>Jovylle</h1>
+      <a class="back-link" href="../../index.html"><i class='bx bx-grid-alt'></i> Themes</a>
+    </header>
+    <div id="content" class="loading">Loading CMS data…</div>
+  </div>
+
+  <!-- toy world floor + a car you can actually drive -->
+  <div class="sb-ground" aria-hidden="true"></div>
+  <svg class="sb-car" viewBox="0 0 120 72" aria-hidden="true">
+    <!-- body -->
+    <path d="M38 35 C40 22 48 18 60 18 L80 18 C90 18 96 26 102 35 Z" fill="#e8503a"/>
+    <rect x="6" y="34" width="108" height="23" rx="11" fill="#e8503a"/>
+    <!-- window -->
+    <path d="M46 33 C48 24 54 22 62 22 L64 22 L64 33 Z" fill="#bfe3f2"/>
+    <path d="M70 22 L76 22 C84 22 89 27 93 33 L70 33 Z" fill="#bfe3f2"/>
+    <!-- headlight + trim -->
+    <circle cx="111" cy="43" r="3" fill="#ffe08a"/>
+    <rect x="14" y="45" width="12" height="3.5" rx="1.75" fill="#c53c28"/>
+    <!-- wheels -->
+    <g class="wheel">
+      <circle cx="32" cy="56" r="13" fill="#2b2b2b"/>
+      <circle cx="32" cy="56" r="6" fill="#eaeaea"/>
+      <path d="M32 51 V61 M27 56 H37" stroke="#9a9a9a" stroke-width="2"/>
+    </g>
+    <g class="wheel">
+      <circle cx="88" cy="56" r="13" fill="#2b2b2b"/>
+      <circle cx="88" cy="56" r="6" fill="#eaeaea"/>
+      <path d="M88 51 V61 M83 56 H93" stroke="#9a9a9a" stroke-width="2"/>
+    </g>
+  </svg>
+  <div class="sb-bubble" id="sb-bubble"></div>
+
+  <script type="module">
+    import { fetchAllCmsData } from '../../shared/cms.js'
+    import { renderPortfolio } from '../../shared/render.js'
+    const content = document.getElementById('content')
+    fetchAllCmsData()
+      .then(d => renderPortfolio(d, content))
+      .catch(e => { content.innerHTML = `<div class="error">Failed to load CMS data: ${e.message}</div>` })
+  </script>
+  <script src="sandbox.js" defer></script>
+</body>
+</html>

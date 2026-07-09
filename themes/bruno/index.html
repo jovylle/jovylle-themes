@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jovylle · Bruno Simon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+  <link rel="stylesheet" href="bruno.css">
+</head>
+<body>
+  <canvas id="webgl"></canvas>
+
+  <div id="ui">
+    <div id="loading">
+      <div class="loading-logo">JOVYLLE</div>
+      <div class="loading-sub">Loading world…</div>
+      <progress id="loading-bar" max="100" value="0"></progress>
+    </div>
+
+    <a class="back-link" href="../../index.html">← Gallery</a>
+
+    <div id="controls-hint">
+      <div class="key-group">
+        <div class="key">W</div>
+        <div class="key-row">
+          <div class="key">A</div>
+          <div class="key">S</div>
+          <div class="key">D</div>
+        </div>
+      </div>
+      <span>Drive around</span>
+      <div class="key-divider"></div>
+      <div class="key">R</div>
+      <span>Reset</span>
+    </div>
+
+    <div id="zone-toast"></div>
+
+    <div id="info-panel">
+      <button id="info-close" aria-label="Close">✕</button>
+      <div id="info-content"></div>
+    </div>
+  </div>
+
+  <script type="module" src="bruno.js"></script>
+</body>
+</html>

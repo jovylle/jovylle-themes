@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="prestige">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jovylle · Prestige</title>
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+  <link rel="stylesheet" href="../../shared/base.css">
+  <link rel="stylesheet" href="prestige.css">
+</head>
+<body>
+  <div id="app">
+    <header id="toolbar">
+      <h1>Jovylle</h1>
+      <a class="back-link" href="../../index.html"><i class='bx bx-grid-alt'></i> Themes</a>
+    </header>
+    <div id="content" class="loading">Loading CMS data…</div>
+  </div>
+  <script type="module">
+    import { fetchAllCmsData } from '../../shared/cms.js'
+    import { renderPortfolio } from '../../shared/render.js'
+    const content = document.getElementById('content')
+    fetchAllCmsData()
+      .then(d => renderPortfolio(d, content))
+      .catch(e => { content.innerHTML = `<div class="error">Failed to load CMS data: ${e.message}</div>` })
+  </script>
+</body>
+</html>
