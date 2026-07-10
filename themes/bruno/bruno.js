@@ -454,27 +454,98 @@ window.addEventListener('keyup', e => {
 // End the intro / unlock audio on any pointer gesture too.
 window.addEventListener('pointerdown', () => { if (introActive) endIntro() })
 
-// Touch joystick (throttle/steer only, per plan)
-let touchStart = null
-window.addEventListener('touchstart', e => {
-  const t = e.touches[0]
-  touchStart = { x: t.clientX, y: t.clientY }
-}, { passive: true })
-window.addEventListener('touchmove', e => {
-  if (!touchStart) return
-  const t = e.touches[0]
-  const dx = t.clientX - touchStart.x
-  const dy = t.clientY - touchStart.y
-  const dead = 12
-  keys.forward  = dy < -dead
-  keys.backward = dy > dead
-  keys.left     = dx < -dead
-  keys.right    = dx > dead
-}, { passive: true })
-window.addEventListener('touchend', () => {
-  touchStart = null
-  keys.forward = keys.backward = keys.left = keys.right = false
-})
+// Backgrounding the tab mid-press (home button / notification pull on mobile)
+// fires neither keyup nor pointerup — zero everything so no key gets stuck on.
+function releaseAllKeys() {
+  keys.forward = keys.backward = keys.left = keys.right = keys.boost = keys.handbrake = false
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAllKeys() })
+window.addEventListener('blur', releaseAllKeys)
+
+// ─── Touch controls (mobile) ───
+const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window
+document.documentElement.classList.toggle('is-touch', isTouch)
+
+const steerZone = document.getElementById('steer-zone')
+const steerStick = document.getElementById('steer-stick')
+const steerKnob = document.getElementById('steer-knob')
+const btnAccel = document.getElementById('btn-accel')
+const btnBrake = document.getElementById('btn-brake')
+const btnBoost = document.getElementById('btn-boost')
+const btnHandbrake = document.getElementById('btn-handbrake')
+const btnReset = document.getElementById('btn-reset')
+
+if (steerZone) {
+  const STEER_RADIUS = 46
+  const STEER_DEADZONE = 10
+  let steerPointerId = null
+  let originX = 0
+  let originY = 0
+
+  function applyStick(dx, dy) {
+    steerKnob.style.transform = `translate3d(${dx}px, ${dy}px, 0)`
+    keys.left = dx < -STEER_DEADZONE
+    keys.right = dx > STEER_DEADZONE
+  }
+
+  function resetStick() {
+    steerPointerId = null
+    steerStick.classList.remove('active')
+    steerKnob.style.transform = 'translate3d(0, 0, 0)'
+    keys.left = false
+    keys.right = false
+  }
+
+  steerZone.addEventListener('pointerdown', e => {
+    if (steerPointerId !== null) return // ignore a second finger mid-drag
+    steerPointerId = e.pointerId
+    try { steerZone.setPointerCapture(e.pointerId) } catch (_) {}
+    originX = e.clientX
+    originY = e.clientY
+    steerStick.style.left = originX + 'px'
+    steerStick.style.top = originY + 'px'
+    steerStick.classList.add('active')
+    applyStick(0, 0)
+  })
+  steerZone.addEventListener('pointermove', e => {
+    if (e.pointerId !== steerPointerId) return
+    let dx = e.clientX - originX
+    let dy = e.clientY - originY
+    const dist = Math.hypot(dx, dy)
+    if (dist > STEER_RADIUS) {
+      const scale = STEER_RADIUS / dist
+      dx *= scale
+      dy *= scale
+    }
+    applyStick(dx, dy)
+  })
+  steerZone.addEventListener('pointerup', e => {
+    if (e.pointerId !== steerPointerId) return
+    resetStick()
+  })
+  steerZone.addEventListener('pointercancel', e => {
+    if (e.pointerId !== steerPointerId) return
+    resetStick()
+  })
+}
+
+function wireHoldButton(btn, key) {
+  if (!btn) return
+  const release = () => { keys[key] = false }
+  btn.addEventListener('pointerdown', e => {
+    try { btn.setPointerCapture(e.pointerId) } catch (_) {}
+    keys[key] = true
+  })
+  btn.addEventListener('pointerup', release)
+  btn.addEventListener('pointercancel', release)
+  btn.addEventListener('pointerleave', release)
+}
+wireHoldButton(btnAccel, 'forward')
+wireHoldButton(btnBrake, 'backward')
+wireHoldButton(btnBoost, 'boost')
+wireHoldButton(btnHandbrake, 'handbrake')
+
+if (btnReset) btnReset.addEventListener('pointerdown', () => resetVehicle())
 
 // ─── Vehicle controls ───
 const MAX_STEER = 0.55
