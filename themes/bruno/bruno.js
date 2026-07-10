@@ -486,6 +486,8 @@ const BOOST_FORCE = 2000
 const REVERSE_FORCE = 800
 const IDLE_BRAKE = 6
 const HANDBRAKE_FORCE = 60
+const BOOST_PAD_TARGET_KMH = 95   // pads top you up toward this, never past
+const BOOST_PAD_FORCE = 820       // base kick, scaled by the speed deficit
 
 let steering = 0
 let boosting = false
@@ -701,17 +703,19 @@ function updateGameplay(dt) {
   }
 
   // Boost pads.
+  const spd = Math.abs(vehicle.currentVehicleSpeedKmHour || 0)
   for (const p of world.boostPads) {
     if (p.cooldown > 0) continue
     if (_carPos.distanceTo(p.pos) < 3.2) {
-      chassisBody.quaternion.vmult(new CANNON.Vec3(0, 0, -1), _impulse)
-      _impulse.y = 0.12
-      _impulse.scale(950, _impulse)
-      chassisBody.applyImpulse(_impulse, chassisBody.position)
+      const deficit = Math.max(0, (BOOST_PAD_TARGET_KMH - spd) / BOOST_PAD_TARGET_KMH)
+      if (deficit > 0.05) {
+        chassisBody.quaternion.vmult(new CANNON.Vec3(0, 0, -1), _impulse)
+        _impulse.y = 0.05
+        _impulse.scale(BOOST_PAD_FORCE * deficit, _impulse)
+        chassisBody.applyImpulse(_impulse, chassisBody.position)
+        sfx.zap(); padKick = 0.5; speedFxBoost = 0.6
+      }
       p.cooldown = 1.5
-      sfx.zap()
-      padKick = 0.5
-      speedFxBoost = 0.6
     }
   }
 
