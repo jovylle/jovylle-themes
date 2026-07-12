@@ -1,9 +1,0 @@
-[build]
-  publish = "."
-
-[[plugins]]
-package = "netlify-plugin-credit-shield"
-
-  [plugins.inputs]
-    mode = "all"
-    trackUrl = "https://credit-shield.pages.dev"
