@@ -1,0 +1,12 @@
+{
+  "name": "jovylle-themes",
+  "version": "1.0.0",
+  "description": "Theme gallery deployed on Netlify",
+  "private": true,
+  "scripts": {
+    "build": "echo 'No build step — static files only'"
+  },
+  "devDependencies": {
+    "netlify-plugin-credit-shield": "^1.0.0"
+  }
+}
